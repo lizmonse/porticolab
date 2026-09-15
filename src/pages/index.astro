@@ -1,0 +1,669 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/site/SiteHeader.astro';
+import SiteFooter from '../components/site/SiteFooter.astro';
+import InstitutionalBacking from '../components/site/InstitutionalBacking.astro';
+import { AUTHOR } from '../data/author';
+
+/**
+ * Landing page.
+ *
+ * Four sections, in order: the hero (#inicio), the features (#caracteristicas),
+ * the author and the project (#proyecto) and a closing call to action. Each is a real
+ * `<section>` labelled by its own heading, and each carries the `.section`
+ * class that supplies the vertical rhythm and — the part that matters for
+ * navigation — the `scroll-margin-top` that keeps a heading clear of the
+ * sticky header when you jump to it.
+ *
+ * No React island here: Astro renders this as HTML, and the calculator's
+ * bundle only downloads when the visitor opens /calculadora. The page ships
+ * three small scripts of its own — the theme toggle, the header's scroll
+ * elevation and the scroll reveal below — well under a kilobyte together. The
+ * hero animation deliberately is not among them: it is pure CSS, where a
+ * scripted draw-on would have cost a library.
+ *
+ * ---------------------------------------------------------------------------
+ * The rule the layout follows
+ * ---------------------------------------------------------------------------
+ *
+ * Rules, not gaps. Wherever two blocks meet, the separation is a drawn line
+ * and the blocks touch — no floating cards, no soft shadows standing in for
+ * an edge. Where a grid needs internal rules, it gets them from `gap-px` over
+ * a `bg-line-strong` parent with opaque cells: one declaration draws a perfect
+ * lattice at any column count, and it re-flows at a breakpoint without any
+ * per-index `border-l` logic that would break the moment a row wraps.
+ *
+ * Depth is a hard 2px offset (`shadow-card`), never a blur. Its colour comes
+ * from the token, so it follows the theme; writing the offset out as an
+ * arbitrary value in the markup would fork that value and let the two drift.
+ */
+
+const features = [
+  {
+    title: 'Motor validado',
+    body:
+      'Cada resultado se contrasta con las soluciones de forma cerrada de la teoría de vigas: ' +
+      'ménsula, viga biapoyada y biempotrada coinciden con precisión de doble.',
+    icon: 'check',
+  },
+  {
+    title: 'Resultados completos',
+    body:
+      'Desplazamientos y giros nodales, reacciones con momento en los empotramientos, y la ' +
+      'fuerza axial, el cortante y el momento flector en ambos extremos de cada barra.',
+    icon: 'table',
+  },
+  {
+    title: 'Visualización interactiva',
+    body:
+      'El pórtico se dibuja con la deformada real de cada barra —una curva, no una recta entre ' +
+      'nudos— y un factor de amplificación ajustable.',
+    icon: 'chart',
+  },
+  {
+    title: 'Detecta estructuras inestables',
+    body:
+      'Si el pórtico es un mecanismo, la herramienta lo dice y se niega a calcular, en vez ' +
+      'de devolver números plausibles pero sin sentido.',
+    icon: 'shield',
+  },
+];
+
+/**
+ * The hero's title block, in the sense a drawing has one.
+ *
+ * Four facts about the method rather than four claims about the tool. Every
+ * one of them is stated again, at length, somewhere further down the page —
+ * this strip exists to let a reader who already knows the subject place the
+ * thing in about two seconds.
+ */
+const SPECS = [
+  { label: 'Método', value: 'Rigidez directa' },
+  { label: 'Grados de libertad', value: '3 por nodo' },
+  { label: 'Resultados', value: 'N · V · M' },
+  { label: 'Ejecución', value: 'En el navegador' },
+];
+---
+
+<Layout
+  title="Pórticos 2D · Análisis matricial de pórticos planos"
+  description="Calculadora interactiva de pórticos planos por el Método de la Rigidez Directa. Desplazamientos, giros, reacciones, fuerzas internas y visualización de la deformada."
+>
+  <!--
+    An ordinary scrolling document. This used to be a panel switcher — one
+    full-height section at a time, driven by the header's section links — and
+    it went when those links did; see the note in `SiteHeader.astro`. What is
+    left is the fallback that was always underneath: every section stacked and
+    reachable by scrolling, which is what a page of this length wanted anyway.
+  -->
+  <div class="flex min-h-screen flex-col">
+    <SiteHeader current="home" />
+
+    <main class="flex-1">
+      <!-- ================================================================
+           1. Hero  ·  #inicio
+           ================================================================ -->
+      <!--
+        The one section given a near-viewport height. It is the only block
+        whose job is to fill the screen and set the tone; the sections below
+        are sized by their content, because forcing a fixed height on a text
+        block either strands it in a sea of white space or squeezes it.
+
+        The `min()` cap is not decoration. On a tall monitor an uncapped
+        `100svh` centres the hero inside a screen-and-a-half of emptiness —
+        measured at a 1785px viewport, roughly 400px of dead space above the
+        headline. 48rem is tall enough to fill a laptop and short enough that
+        a big display gets a hero rather than a void.
+
+        `svh` rather than `vh` so mobile browsers measure to the *small*
+        viewport, the one that excludes the retractable URL bar; `vh` there
+        overflows by the height of that bar.
+      -->
+      <section
+        id="inicio"
+        aria-labelledby="inicio-titulo"
+        class="section hero-tall relative overflow-hidden"
+      >
+        <!--
+          Decorative ground: the ruled mesh alone. The two blurred accent
+          blooms that used to sit here are gone — a 32rem circle of colour at
+          `blur-3xl` is the single most recognisable gesture of the style this
+          skin replaces, and no amount of re-colouring it would have stopped it
+          reading as the old page.
+        -->
+        <div
+          class="blueprint-grid fade-edges pointer-events-none absolute inset-0"
+          aria-hidden="true"
+        >
+        </div>
+
+        <div class="section-shell section-shell--wide relative w-full">
+          <!--
+            Centred, and stacked rather than split into two columns. The old
+            hero put the headline and the illustration shoulder to shoulder,
+            which is the layout every product page uses; setting the title
+            across the full measure and hanging a ruled grid underneath it is
+            what makes this read as a document rather than as a landing page.
+          -->
+          <div class="animate-rise-in text-center">
+            <p
+              class="border-line-strong text-ink-muted inline-flex items-center gap-2.5 border px-3 py-1.5 text-[11px] font-semibold tracking-[0.2em] uppercase"
+            >
+              <span class="bg-accent animate-pulse-dot size-1.5"></span>
+              Método de la rigidez directa
+            </p>
+
+            <!--
+              The product name, set as the headline — just the name, where it
+              used to be a sentence about the name ("Análisis de Pórticos 2D").
+              Describing the thing is the job of the line underneath; the h1 is
+              the one place it gets to simply say what it is called.
+
+              `leading-[0.95]` — tighter than 1. At display sizes the default
+              line height opens a gap between the two lines wide enough to read
+              as two separate headings; pulling it under 1 closes the title
+              into a single block, which is the whole point of setting it this
+              large. The explicit `<br>` keeps the break where the typography
+              wants it instead of where the viewport happens to put it.
+            -->
+            <h1
+              id="inicio-titulo"
+              class="font-display text-ink mx-auto mt-8 max-w-4xl text-5xl leading-[0.95] font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl"
+            >
+              Pórticos<br />2D
+            </h1>
+
+            <p
+              class="font-display text-ink-muted mx-auto mt-6 text-lg font-semibold tracking-tight sm:text-xl"
+            >
+              Análisis matricial de pórticos planos
+            </p>
+
+            <p class="text-ink-muted mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-pretty">
+              Resuelve pórticos planos en el navegador. Introduce nodos, barras, apoyos y cargas,
+              y obtén los desplazamientos, los giros, las reacciones y las fuerzas internas —axial,
+              cortante y momento— de cada elemento, con la deformada dibujada sobre la original.
+            </p>
+          </div>
+
+          <!--
+            The ruled block: a title-block strip over two cells, one holding
+            the call to action and one the drawing. `gap-px` on a
+            `bg-line-strong` ground with opaque cells is what draws the
+            internal rules — see the note in the frontmatter.
+          -->
+          <div class="border-line-strong animate-fade-in mt-14 border">
+            <dl
+              class="bg-line-strong border-line-strong grid grid-cols-2 gap-px border-b sm:grid-cols-4"
+            >
+              {
+                SPECS.map((spec) => (
+                  <div class="bg-surface px-5 py-4">
+                    <dt class="text-ink-faint text-[10px] font-semibold tracking-[0.18em] uppercase">
+                      {spec.label}
+                    </dt>
+                    <dd class="font-display text-ink mt-1.5 text-sm font-semibold tracking-tight">
+                      {spec.value}
+                    </dd>
+                  </div>
+                ))
+              }
+            </dl>
+
+            <div
+              class="bg-line-strong grid gap-px lg:grid-cols-[minmax(0,21rem)_minmax(0,1fr)]"
+            >
+              <!-- Call to action. `justify-between` pins the buttons to the
+                   bottom of the cell so they line up with the base of the
+                   drawing beside them at desktop widths. -->
+              <div class="bg-surface flex flex-col justify-between gap-10 p-8">
+                <div>
+                  <p class="text-ink-faint text-[10px] font-semibold tracking-[0.18em] uppercase">
+                    Empezar
+                  </p>
+                  <p class="text-ink-muted mt-3 leading-relaxed">
+                    La calculadora abre con un pórtico de un vano, empotrado en sus bases, ya
+                    cargado y resuelto.
+                  </p>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                  <a
+                    href="/calculadora"
+                    class="bg-accent border-ink shadow-card u-btn inline-flex items-center justify-between gap-3 border px-5 py-3.5 text-base font-semibold text-white"
+                  >
+                    Abrir calculadora
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="u-btn__arrow size-5 shrink-0"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 12h14M13 6l6 6-6 6"></path>
+                    </svg>
+                  </a>
+
+                  <a
+                    href="#caracteristicas"
+                    class="border-line-strong text-ink-muted hover:border-ink hover:text-ink u-btn inline-flex items-center justify-between gap-3 border px-5 py-3.5 text-base font-medium"
+                  >
+                    Ver características
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="size-5 shrink-0"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 5v14M6 13l6 6 6-6"></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+
+              <!--
+                Decorative diagram: the same visual language the calculator
+                uses, so the landing shows what the tool actually produces.
+                Blue is tension, orange compression, dashed green the
+                deflected shape — the structural convention, identical to the
+                real drawing.
+
+                The draw-on is pure CSS. Every stroke carries `pathLength="1"`,
+                which normalises its length to 1 unit regardless of its real
+                geometry, so one keyframe animating `stroke-dashoffset` from 1
+                to 0 draws any of them correctly and the stagger is just a
+                delay.
+              -->
+              <div class="bg-surface flex flex-col justify-center p-6 sm:p-8">
+                <svg
+                  viewBox="0 0 420 260"
+                  class="w-full"
+                  role="img"
+                  aria-label="Diagrama de un pórtico empotrado en sus bases, con una carga lateral y su deformada flectada"
+                >
+                  <!--
+                    Deflected shape, behind. It cannot use the draw-on: its dash
+                    pattern is what makes it read as "deformed", and the draw
+                    animation would have to overwrite that dash array.
+
+                    Bézier curves, not straight segments. A frame member BENDS,
+                    and drawing the deformed portal as a leaning parallelogram
+                    would illustrate the one thing this tool exists to compute as
+                    though it did not happen. The S-curve of each column, with
+                    its tangent vertical at the fixed base and the inflection
+                    near mid-height, is the shape a fixed-base portal actually
+                    takes under a lateral load.
+                  -->
+                  <g
+                    class="animate-sway"
+                    style="transform-origin: 210px 215px; stroke: var(--color-deformed)"
+                    stroke-width="2"
+                    stroke-dasharray="6 5"
+                    fill="none"
+                    opacity="0.7"
+                  >
+                    <path
+                      d="M70 215 C 70 160, 80 105, 104 62 C 190 56, 300 68, 384 62 C 358 105, 350 160, 350 215"
+                    ></path>
+                  </g>
+
+                  <!-- Members, drawn in the order a frame is erected: the two
+                       columns, then the beam that ties them together. -->
+                  <g stroke-width="4" stroke-linecap="square" fill="none">
+                    <line
+                      x1="70"
+                      y1="215"
+                      x2="70"
+                      y2="60"
+                      pathLength="1"
+                      class="animate-draw-stroke"
+                      style="stroke: var(--color-tension); animation-delay: 0.15s"></line>
+                    <line
+                      x1="350"
+                      y1="215"
+                      x2="350"
+                      y2="60"
+                      pathLength="1"
+                      class="animate-draw-stroke"
+                      style="stroke: var(--color-compression); animation-delay: 0.4s"></line>
+                    <line
+                      x1="70"
+                      y1="60"
+                      x2="350"
+                      y2="60"
+                      pathLength="1"
+                      class="animate-draw-stroke"
+                      style="stroke: var(--color-bar-zero); animation-delay: 0.65s"></line>
+                  </g>
+
+                  <!--
+                    Fixed bases. The hatched wall is the whole point of the
+                    illustration being a frame: it says the joint cannot rotate,
+                    which is what lets the columns carry moment.
+                  -->
+                  <g
+                    style="stroke: var(--color-ink-faint); animation-delay: 1.1s"
+                    stroke-width="2"
+                    stroke-linecap="square"
+                    fill="none"
+                    class="animate-fade-in"
+                  >
+                    <path
+                      d="M44 215 h52 M52 215 l-7 10 M64 215 l-7 10 M76 215 l-7 10 M88 215 l-7 10"
+                    ></path>
+                    <path
+                      d="M324 215 h52 M332 215 l-7 10 M344 215 l-7 10 M356 215 l-7 10 M368 215 l-7 10"
+                    ></path>
+                  </g>
+
+                  <!--
+                    Rigid joints, once the members that meet at them exist.
+                    Square rather than circular: the drawing follows the same
+                    rule as the layout around it, and a rotation-fixed joint is
+                    if anything better served by a square than by a disc.
+                  -->
+                  <g
+                    style="fill: var(--color-base-raised); stroke: var(--color-ink-muted)"
+                    stroke-width="3"
+                  >
+                    <rect x="63" y="208" width="14" height="14" class="animate-pop-in" style="animation-delay: 1.15s"
+                    ></rect>
+                    <rect x="343" y="208" width="14" height="14" class="animate-pop-in" style="animation-delay: 1.25s"
+                    ></rect>
+                    <rect x="63" y="53" width="14" height="14" class="animate-pop-in" style="animation-delay: 1.35s"
+                    ></rect>
+                    <rect x="343" y="53" width="14" height="14" class="animate-pop-in" style="animation-delay: 1.45s"
+                    ></rect>
+                  </g>
+
+                  <!-- The load arrives last: the structure exists, then it is
+                       loaded, which is the order the method itself follows. -->
+                  <g
+                    stroke-width="3"
+                    stroke-linecap="square"
+                    class="animate-arrow-land"
+                    style="stroke: var(--color-load); animation-delay: 1.65s"
+                  >
+                    <line x1="18" y1="60" x2="58" y2="60"></line>
+                    <path d="M58 60 l-11 -7 M58 60 l-11 7" fill="none"></path>
+                  </g>
+                </svg>
+
+                <div
+                  class="text-ink-muted mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs"
+                >
+                  <span class="inline-flex items-center gap-2">
+                    <span class="bg-tension h-0.5 w-5"></span>Tracción
+                  </span>
+                  <span class="inline-flex items-center gap-2">
+                    <span class="bg-compression h-0.5 w-5"></span>Compresión
+                  </span>
+                  <span class="inline-flex items-center gap-2">
+                    <span class="bg-bar-zero h-0.5 w-5"></span>Axial nula
+                  </span>
+                  <span class="inline-flex items-center gap-2">
+                    <span class="border-deformed h-0 w-5 border-t-2 border-dashed"></span>Deformada
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           2. Features  ·  #caracteristicas
+           ================================================================ -->
+      <section
+        id="caracteristicas"
+        aria-labelledby="caracteristicas-titulo"
+        class="section section--alt section--divided"
+      >
+        <div class="section-shell">
+          <div class="reveal max-w-3xl">
+            <p class="text-ink-faint text-[11px] font-semibold tracking-[0.2em] uppercase">
+              Características
+            </p>
+            <h2
+              id="caracteristicas-titulo"
+              class="font-display text-ink mt-3 text-3xl font-bold tracking-tight text-balance sm:text-4xl"
+            >
+              Todo lo que necesitas para resolver un pórtico
+            </h2>
+            <p class="text-ink-muted mt-4 text-lg leading-relaxed">
+              Pensada para el aula: los resultados son verificables paso a paso, no una caja negra.
+            </p>
+          </div>
+
+          <div class="mt-12 grid gap-6 sm:grid-cols-2">
+            {
+              /*
+                `--reveal-delay` staggers the cards by index. Set as a custom
+                property on the element rather than as a utility class so the
+                delay stays data-driven — a fifth feature staggers correctly
+                without anyone adding a `delay-240` class for it.
+
+                The number in the corner is `.num`, the tabular monospace: it
+                is an index, and an index that shifts its own width between 01
+                and 04 is exactly the kind of small wrongness a grid of cards
+                makes obvious.
+              */
+              features.map((feature, index) => (
+                <article
+                  class="border-ink bg-surface-raised shadow-card u-lift reveal border p-7"
+                  style={`--reveal-delay: ${index * 70}ms`}
+                >
+                  <div class="flex items-start justify-between gap-4">
+                    <span class="border-ink text-ink u-lift__icon flex size-11 shrink-0 items-center justify-center border">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="size-6"
+                        aria-hidden="true"
+                      >
+                        {feature.icon === 'check' && <path d="m5 13 4 4L19 7" />}
+                        {feature.icon === 'table' && <path d="M3 5h18v14H3zM3 10h18M9 10v9" />}
+                        {feature.icon === 'chart' && <path d="M3 19h18M5 19 12 5l7 14M7.5 14h9" />}
+                        {feature.icon === 'shield' && (
+                          <path d="M12 3 4 6v6c0 5 3.4 8.3 8 9 4.6-.7 8-4 8-9V6ZM12 9v4M12 16h.01" />
+                        )}
+                      </svg>
+                    </span>
+                    <span class="num text-ink-faint text-sm font-semibold" aria-hidden="true">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+
+                  <h3 class="font-display text-ink mt-6 text-lg font-semibold tracking-tight">
+                    {feature.title}
+                  </h3>
+                  <p class="text-ink-muted mt-2.5 leading-relaxed">{feature.body}</p>
+                </article>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           3. About the project  ·  #proyecto
+           ================================================================ -->
+      <!--
+        The credit for the work: who wrote it, and the institutions behind it.
+
+        The name, the role and the bio all live in `data/author.ts`, so this
+        section and the printed report header cannot drift apart. Several of
+        those values are still `[bracketed]` placeholders — see the note at the
+        top of that file.
+      -->
+      <section
+        id="proyecto"
+        aria-labelledby="proyecto-titulo"
+        class="section section--divided"
+      >
+        <div class="section-shell">
+          <!-- `reveal` but no `u-lift`: this card is a statement, not a
+               control, and a card that moves under the cursor promises a click
+               that does not exist. -->
+          <div class="border-ink bg-surface shadow-raised reveal border">
+            <div class="border-ink border-b px-8 py-5">
+              <p class="text-ink-faint text-[11px] font-semibold tracking-[0.2em] uppercase">
+                El proyecto
+              </p>
+            </div>
+
+            <div class="bg-line-strong grid gap-px lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
+              <div class="bg-surface p-8">
+                <span
+                  class="bg-accent border-ink font-display flex size-16 items-center justify-center border text-xl font-bold tracking-tight text-white"
+                  aria-hidden="true"
+                >
+                  {AUTHOR.initials}
+                </span>
+
+                <h2
+                  id="proyecto-titulo"
+                  class="font-display text-ink mt-6 text-2xl font-bold tracking-tight text-balance"
+                >
+                  {AUTHOR.name}
+                </h2>
+                <p class="text-ink-muted mt-2 text-sm font-medium">{AUTHOR.role}</p>
+              </div>
+
+              <div class="bg-surface p-8">
+                <p class="text-ink-muted max-w-2xl leading-relaxed">{AUTHOR.bio}</p>
+
+                <!--
+                  Institutional backing, inside the author's card and under a
+                  rule: it belongs to the credit, not beside it. Placing it as
+                  a sibling block would read as a second, competing claim of
+                  authorship.
+                -->
+                <div class="border-line-strong mt-8 max-w-2xl border-t pt-8">
+                  <InstitutionalBacking size="md" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           4. Closing call to action
+           ================================================================ -->
+      <!--
+        No id: it is the page's closing move, not a destination.
+
+        It used to be hidden whenever scripting turned the page into panels — a
+        closing call to action works by being what you reach at the end, and
+        with one panel on screen there was no end to reach. The page scrolls
+        again, so it is back for good.
+      -->
+      <section
+        aria-labelledby="cierre-titulo"
+        class="section section--alt section--divided"
+      >
+        <div class="section-shell">
+          <div
+            class="border-ink bg-surface shadow-raised reveal relative overflow-hidden border px-8 py-14 text-center sm:px-16"
+          >
+            <div
+              class="blueprint-grid fade-edges pointer-events-none absolute inset-0"
+              aria-hidden="true"
+            >
+            </div>
+
+            <div class="relative">
+              <h2
+                id="cierre-titulo"
+                class="font-display text-ink text-3xl font-bold tracking-tight text-balance sm:text-4xl"
+              >
+                Empieza con un ejemplo resuelto
+              </h2>
+              <p class="text-ink-muted mx-auto mt-4 max-w-2xl text-lg leading-relaxed">
+                La calculadora abre con un pórtico de un vano, empotrado en sus bases, ya cargado y
+                resuelto. Modifica cualquier valor y vuelve a resolver para ver cómo cambian los
+                momentos y la deformada.
+              </p>
+              <a
+                href="/calculadora"
+                class="bg-accent border-ink shadow-card u-btn mt-10 inline-flex items-center gap-3 border px-7 py-3.5 text-base font-semibold text-white"
+              >
+                Abrir calculadora
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="u-btn__arrow size-5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6"></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <SiteFooter />
+  </div>
+</Layout>
+
+<script>
+  /*
+    Scroll reveal.
+
+    The only script this page still owns. The view controller that used to
+    sit above it — the one that turned the sections into switchable panels —
+    went with the header's section links; see the note in `SiteHeader.astro`.
+
+    `unobserve` on first sight is the point: an entrance that replays every
+    time you scroll back up stops being an entrance and becomes a
+    distraction.
+
+    The hidden state is gated behind `[data-js]`, which the inline script in
+    the layout sets before first paint. That gate is the whole progressive
+    enhancement story: with JavaScript unavailable the attribute is never
+    written, the rule never matches, and every element is simply visible.
+  */
+  const targets = document.querySelectorAll<HTMLElement>('.reveal');
+
+  if (targets.length > 0) {
+    // No IntersectionObserver (a very old browser): show everything at once
+    // rather than leaving the page blank.
+    if (!('IntersectionObserver' in window)) {
+      for (const target of targets) target.classList.add('is-visible');
+    } else {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        },
+        // A small bottom inset means an element starts moving just before its
+        // top edge clears the fold, so it is already settling by the time it
+        // is properly in view instead of visibly catching up.
+        { rootMargin: '0px 0px -12% 0px', threshold: 0.05 },
+      );
+
+      for (const target of targets) observer.observe(target);
+    }
+  }
+</script>

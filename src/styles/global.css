@@ -1,0 +1,1322 @@
+@import "tailwindcss";
+
+/*
+  ===========================================================================
+  Pórticos 2D — design tokens
+  ===========================================================================
+
+  Everything visual is tuned from this file. Components never hard-code a
+  colour: they use the semantic utilities Tailwind generates from these tokens
+  (`bg-surface`, `text-ink-muted`, `border-line`), so re-skinning the whole
+  application means editing this file and nothing else.
+
+  ---------------------------------------------------------------------------
+  One theme, and how the machinery survives
+  ---------------------------------------------------------------------------
+
+  The application renders in ONE palette. There is no dark theme, no toggle and
+  no `prefers-color-scheme` branch: the `@theme` block below is the whole thing,
+  and `:root` declares `color-scheme: light` so the browser paints its own
+  widgets — scrollbars, form controls, the caret — to match rather than
+  guessing from the operating system.
+
+  What is left of the theming machinery is not vestigial. Tailwind emits every
+  token as a custom property on `:root` and every utility refers to it by
+  `var()`, so the palette is still swappable from this one file — which is what
+  the last several reskins actually did. Redefining these same names under a
+  selector would re-skin the whole interface again, with no duplicated rules and
+  no per-component variant. The capability is kept; the second palette is not.
+
+  Deliberately NOT `@theme inline`: that mode inlines values into the utilities
+  and stops emitting the variables, which would break the places that
+  legitimately read them directly — the SVG drawing (`utils/theme.ts`), the
+  `--app-*` variables below, and the offset shadows, which are declared in
+  terms of `var(--color-line-strong)`.
+
+  The PRINT block at the bottom is the one place a second palette still exists,
+  and it has to: paper has one ground and it is white.
+
+  ---------------------------------------------------------------------------
+  The one rule that matters
+  ---------------------------------------------------------------------------
+
+  Two colour families are kept strictly apart:
+
+    - STRUCTURAL colours state a fact about the analysis. Blue is tension,
+      orange is compression, green is the deflected shape, red is an applied
+      load. They are data, not decoration, and must never be borrowed for
+      interface chrome — a button painted tension-blue would be making a claim
+      about the structure. Their *hue* is fixed in all three themes; only the
+      shade moves, because a tone tuned to read on black goes pale on paper.
+
+    - The ACCENT (electric blue) is interface chrome: primary buttons, links,
+      focus rings, the current selection. It never appears inside the drawing.
+
+  ---------------------------------------------------------------------------
+  Why the deflected shape is green
+  ---------------------------------------------------------------------------
+
+  It was violet until the palette before this one. Violet went when the accent
+  briefly moved there, and it has not come back: the drawing reads better with
+  the deflected shape well away from every solid member colour, and green is
+  the widest gap the structural family leaves. It is the weakest convention of
+  the four — no standard assigns the deflected shape a colour — it is drawn
+  dashed rather than solid, and it is named in the legend.
+
+  The deformed green never shares a legend with the diagram teal: the diagram
+  views replace the deflected shape rather than drawing beside it.
+
+  ---------------------------------------------------------------------------
+  KNOWN EXCEPTION: the accent and the tension blue share a hue
+  ---------------------------------------------------------------------------
+
+  This is the one place the rule above is knowingly broken, and it is recorded
+  here rather than quietly tolerated.
+
+  The accent is electric blue at 220°. `--color-tension` is blue at 217°. By
+  the rule, a filled primary button is therefore wearing the colour that means
+  "this member is in tension" — exactly the failure the rule was written to
+  prevent, and the example it uses to state itself.
+
+  It stands because both halves were fixed by decisions taken separately: the
+  interface must be blue, and blue must mean tension. Given both, the only
+  mitigation left is value, so the two are pushed as far apart in lightness as
+  they can go while each still passes AA on its own ground — the accent is a
+  vivid, fully saturated blue and the tension a deep navy, about two steps
+  apart. They are distinguishable side by side. They are not distinguishable
+  *in principle*, which is what a semantic rule is about.
+
+  If this is ever revisited, there are only two real fixes: move the accent off
+  blue, or move tension off blue. Deepening either further does not help — it
+  costs contrast without buying separation.
+*/
+
+@theme {
+  /* --- Typography -------------------------------------------------------
+     One superfamily, three cuts. IBM Plex was drawn as a single system, so
+     the serif headings, the interface sans and the numerals share a skeleton
+     and a rhythm — which is most of why the page reads as one printed
+     document rather than as three fonts that happened to meet.
+
+     Plex Serif carries the display voice: academic and typeset, deliberately
+     not a technical grotesk. Plex Sans carries the interface, and holds its
+     shape at 12px inside a dense stiffness matrix where a geometric sans
+     would close up. Plex Mono carries every number. Each has a real fallback
+     stack, so a failed webfont degrades instead of collapsing. */
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "IBM Plex Serif", ui-serif, Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+
+  /* ======================= LIGHT THEME (default) ======================= */
+
+  /* --- Surfaces ---------------------------------------------------------
+     A ladder from the page up to the most raised inset, plus `sunken` for
+     panels that read as cut *into* the surface: the tab track, the matrix
+     ground, the drawing board.
+
+     Neutral greys, and the page is deliberately one step below the cards
+     rather than equal to them: pure white everywhere would leave a white
+     panel on a white ground with nothing but its border to separate the two,
+     and the border is already doing enough work in this skin. */
+  --color-base: #fafafa;
+  --color-base-raised: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f4f4f5;
+  --color-sunken: #efeff1;
+
+  /* Hairlines, and they are two very different jobs.
+
+     `line` is quiet — it separates table rows, where a strong rule twenty
+     times over turns a stiffness matrix into a barcode. `line-strong` is the
+     drawn edge, and it doubles as the colour of the offset shadow, so it has
+     to read as a deliberate ledge rather than as a grey smudge. */
+  --color-line: #d4d4d8;
+  --color-line-strong: #3f3f46;
+
+  /* --- Ink --------------------------------------------------------------
+     Near-black rather than pure black. #000 on white is harsh at 14px and is
+     what makes an interface look like unstyled HTML; #111 keeps the weight
+     the hard borders need without the glare.
+
+     Every weight verified at AA against the surface it actually sits on.
+     `ink-dim` is the floor: content that is deliberately subordinate but
+     still has to be read — the zeros in a sparse stiffness matrix, the
+     em-dash standing in for an absent reaction. */
+  --color-ink: #111111;
+  --color-ink-muted: #3f3f46;
+  --color-ink-faint: #52525b;
+  /* Measured against the `sunken` panel it is read on, not against the card:
+     a matrix cell sits on #efeff1. 5.8:1 there. */
+  --color-ink-dim: #5c5c66;
+
+  /* Overlay ink for subtle fills — zebra stripes, hover washes, inset
+     panels. Always used with an opacity modifier (`bg-wash/5`). It is the
+     one token that inverts between themes: dark ink over a light page, light
+     ink over a dark one. */
+  --color-wash: #111111;
+
+  /* --- Accent (interface only) ------------------------------------------
+     Electric blue, fully saturated. 5.61:1 with white type on it, 5.37:1 as
+     text on the page — comfortably AA in both directions, which is the bar
+     every accent in this project has had to clear.
+
+     Deliberately the *vivid* end of blue rather than the cobalt sitting one
+     step down, and that is not decoration: `--color-tension` is a blue too,
+     and lightness is the only axis left to separate them on. See the KNOWN
+     EXCEPTION note at the top of this file — this value and the tension navy
+     below are two ends of one compromise, so moving either closes the gap.
+
+     `accent-bright` is the focus ring, brighter still — see the note on the
+     focus rule further down for why the ring uses it rather than `accent`. */
+  --color-accent: #0055ff;
+  --color-accent-bright: #3b82f6;
+  /* Text sitting on an accent *tint*, so it inverts with the theme: dark
+     enough to read on a pale wash here, light enough on a dark one there. */
+  --color-accent-ink: #0040c0;
+
+  /* --- Structural colours (meaning, never decoration) --------------------
+     Shaded for a white ground, which lets them run a step brighter than a
+     warm or dark one would.
+
+     Each has an `-ink` partner, and the split is not cosmetic. A 3px stroke
+     and 12px badge text have genuinely different needs: the vivid orange that
+     makes a compression member unmistakable on graph paper falls to 3.3:1 as
+     small text on its own tint, while an orange dark enough to pass AA as
+     text is close enough to the red of a load arrow to be confused with it.
+     One token cannot satisfy both, so there are two — same hue, same meaning,
+     one tuned for line work and one for type. On the dark theme they
+     converge, because a light ground is where the conflict comes from. */
+  /* Deep navy, pushed two steps down from where it sat, and the reason is the
+     accent rather than the drawing: at #2563eb the tension blue and the
+     interface blue were the same colour. This is as far as it can go and still
+     read as a member stroke rather than as black. */
+  --color-tension: #1e40af;
+  --color-tension-ink: #1e3a8a;
+  --color-compression: #ea580c;
+  --color-compression-ink: #9a3412;
+  /* Green. See the note at the top of this file. */
+  --color-deformed: #16a34a;
+  --color-load: #dc2626;
+  /* A bar carrying no force. Neutral by design: "nothing to report" must not
+     look like a third kind of stress. */
+  --color-bar-zero: #a1a1aa;
+
+  /* Sign of an internal-force diagram — a THIRD structural pair, deliberately
+     not the tension blue and the compression orange.
+
+     Borrowing those would have been cheaper and wrong. Blue states "this
+     member is in tension"; a positive shear ordinate says nothing of the
+     kind, and a student reading a blue lobe on a shear diagram would import a
+     meaning that is not there. Teal and rose carry only "positive" and
+     "negative" — and they stay distinguishable to a red-green colour-blind
+     reader, which the obvious green/red pair would not. */
+  --color-diagram-positive: #0d9488;
+  --color-diagram-negative: #be123c;
+
+  /* --- Status ----------------------------------------------------------- */
+  /* Each status colour doubles as text on its own 15% tint — the glyph badge
+     in the solve bar — which is the surface that sets the shade. `ok` leans
+     emerald rather than the deformed shape's green: they are never on screen
+     together, but two greens a few degrees apart in one product is the kind
+     of near-miss that reads as a mistake. */
+  --color-ok: #047857;
+  --color-warn: #b45309;
+  --color-danger: #dc2626;
+
+  /* --- Radii ------------------------------------------------------------
+     Near-square. A 16px radius reads as a consumer app; 4px reads as a drawn
+     box, which is what a page of engineering tables should look like. Kept
+     off zero on purpose — a true right angle turns every card corner into a
+     needle that snags the eye on each scroll. */
+  --radius-card: 0.25rem;
+  --radius-inset: 0.1875rem;
+
+  /* --- Elevation --------------------------------------------------------
+     Not depth — offset. A blurred drop shadow says "this floats above the
+     page"; a hard displacement says "this is printed a hair out of register",
+     which is the whole idea of this skin. There is no blur radius anywhere,
+     so the edge stays crisp at any zoom.
+
+     `var(--color-line-strong)` rather than a literal, and that is what lets
+     the dark theme drop its shadow overrides entirely: the offset re-colours
+     itself from whichever theme is live, staying a drawn ledge on black
+     instead of the invisible smear a light-theme shadow would become.
+
+     There is no `--shadow-glow` any more. It was the accent halo behind the
+     old primary button; nothing has referenced it since the gradients went,
+     and a focus ring is an `outline`, not a shadow. */
+  --shadow-card: 2px 2px 0 0 var(--color-line-strong);
+  --shadow-raised: 4px 4px 0 0 var(--color-line-strong);
+}
+
+/*
+  Non-utility variables: read only by the component classes further down, so
+  they stay out of Tailwind's namespace instead of generating `bg-glass` and
+  `border-grid` utilities nobody will ever call.
+*/
+:root {
+  color-scheme: light;
+
+  /*
+    Height of the sticky header, and the offset an anchored section scrolls to.
+
+    These two are the fix for the navigation problem: a bare `#id` jump puts
+    the section's top edge at viewport y=0, which is *underneath* a fixed
+    header, so the heading you navigated to is the one thing you cannot see.
+    `--app-anchor-offset` is the bar's height plus a margin of air, and every
+    section spends it as `scroll-margin-top`.
+
+    Kept as variables rather than a Tailwind class so the header and the
+    sections read the same number; if the bar grows, one edit moves both.
+  */
+  --app-header-h: 3.875rem;
+  --app-anchor-offset: 6rem;
+
+  /*
+    Motion tokens.
+    ---------------------------------------------------------------------
+    Three speeds and three curves, and nothing in the codebase invents its
+    own. Consistent timing is most of what separates an interface that feels
+    designed from one that feels assembled: when every hover answers in the
+    same 140ms with the same curve, the whole thing reads as one object.
+
+      fast   a direct answer to the pointer — hover, press, focus.
+      base   a state change the eye should follow — a panel, an indicator.
+      slow   an entrance, where the element has distance to cover.
+
+    `--ease-spring` overshoots by a hair. It is reserved for things that
+    should feel picked up rather than moved: the load arrow landing on the
+    hero frame, an icon under the cursor. Used widely it reads as wobbly.
+  */
+  --motion-fast: 140ms;
+  --motion-base: 240ms;
+  --motion-slow: 460ms;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Card fill. Translucent so the ruled ground reads through it. */
+  --app-glass: rgb(255 255 255 / 0.85);
+  /* Sticky header fill, behind a backdrop blur. */
+  --app-chrome: rgb(255 255 255 / 0.8);
+  /* Ruled ground: a graphite ruling on the page, kept far below the threshold
+     where it would compete with a number for attention. Neutral now that the
+     palette is — a warm ruling under a blue accent reads as a stain. */
+  --app-grid: rgb(17 17 17 / 0.05);
+  --app-grid-major: rgb(17 17 17 / 0.09);
+  /* Chevron drawn into the `<select>` background, stroked in ink-muted. */
+  --app-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233f3f46' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* ===========================================================================
+   Base
+   =========================================================================== */
+
+@layer base {
+  /*
+    Tabular figures everywhere, application-wide.
+
+    This is the single highest-leverage rule in the file. Every table in the
+    tool is a column of numbers that must line up digit over digit — a
+    stiffness matrix with proportional figures is genuinely harder to read
+    down a column, because the decimal points wander.
+  */
+  :root {
+    font-variant-numeric: tabular-nums;
+    /* Anchor jumps glide instead of teleporting. The reduced-motion block at
+       the end of this file overrides it back to `auto`. */
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-base);
+    color: var(--color-ink);
+  }
+
+  /*
+    One focus style for the whole application, defined once.
+
+    `:focus-visible` rather than `:focus` so a mouse click never paints a ring,
+    while every keyboard arrival gets one. Components add nothing; they inherit
+    this.
+  */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    /*
+      3px of solid accent, no blur, no halo. The ring is the loudest thing the
+      interface does, so it is drawn the same way every other edge here is.
+
+      `accent-bright` rather than `accent`, and that is the whole reason the
+      bright token still exists. `accent` is pinned to a crossover that keeps
+      white type legible on a filled button, which leaves it too dark to read
+      as a ring against the black theme — 3.3:1. `accent-bright` has no fill
+      to serve, so it is free to be tuned for exactly this: 4.4:1 on the light
+      ground, 7.5:1 on the dark one, comfortably past the 3:1 that WCAG asks
+      of a non-text indicator on both.
+    */
+    outline: 3px solid var(--color-accent-bright);
+    outline-offset: 2px;
+    /*
+      No `border-radius` here. The temptation is to round the ring, but this
+      rule applies to the element, not the outline — it would reshape a pill
+      button into a rounded rectangle the moment it took focus. Outlines
+      already follow the element's own radius in every current browser.
+
+      `:where()` keeps this at zero specificity so a component can still opt
+      out deliberately. The flip side is that any stray `outline-none` silently
+      wins, so components must not carry one.
+    */
+  }
+
+  /* Scrollbars follow the theme. Without this the browser default cuts a
+     stripe of the wrong lightness down the side of every scrollable panel. */
+  * {
+    scrollbar-color: var(--color-line-strong) transparent;
+    scrollbar-width: thin;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-line-strong);
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-clip: padding-box;
+  }
+}
+
+/* ===========================================================================
+   Components
+   =========================================================================== */
+
+@layer components {
+  /*
+    Section rhythm.
+    ---------------------------------------------------------------------
+    Three rules that together make the landing read as a stack of separate
+    blocks rather than one continuous scroll:
+
+      `.section`       vertical breathing room and the anchor offset, so a
+                       heading lands clear of the sticky header.
+      `.section-shell` the shared measure. Every section uses the same max
+                       width and the same horizontal padding, which is what
+                       lines the content up into one column down the page.
+      `.section--alt`  a barely-there change of ground, alternated between
+                       neighbours. Combined with the hairline it means that
+                       when the edge of the next section peeks into view it
+                       reads as *another block*, not as more of this one.
+
+    The tints are one step apart on the surface ladder on purpose. Anything
+    stronger stripes the page; anything weaker does not separate at all.
+  */
+  .section {
+    padding-block: 4.5rem;
+    scroll-margin-top: var(--app-anchor-offset);
+  }
+
+  @media (min-width: 1024px) {
+    .section {
+      padding-block: 6.5rem;
+    }
+  }
+
+  .section-shell {
+    margin-inline: auto;
+    max-width: 72rem;
+    padding-inline: 1.5rem;
+  }
+
+  /*
+    A wider measure, for the hero only.
+
+    Body text needs a narrow column to stay readable, which is what the 72rem
+    default protects. The hero is not body text: it is a headline beside an
+    illustration, and holding those two to the same measure is what made them
+    look crowded into the middle of a large screen with empty margins either
+    side. Widening the frame is what gives the two halves room to separate.
+  */
+  .section-shell--wide {
+    max-width: 84rem;
+  }
+
+  .section--alt {
+    background-color: var(--color-base-raised);
+  }
+
+  /* `line-strong`, not `line`. The soft skin wanted a rule you had to look
+     for; this one wants the seam between two sections to be as plainly drawn
+     as every other edge on the page. */
+  .section--divided {
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  /*
+    The hero's near-viewport height, and its centring.
+
+    Both live here rather than on the element as `min-h-[...]` and
+    `flex items-center`, because a utility would resolve `min-h-screen` to
+    `100vh` — which on a phone includes the retractable URL bar and hands the
+    page a scrollbar it does not need. `svh` measures to the small viewport,
+    the one that excludes it.
+  */
+  .hero-tall {
+    display: grid;
+    align-content: center;
+    min-height: min(calc(100svh - var(--app-header-h)), 48rem);
+  }
+
+  /*
+    Blueprint grid.
+
+    Two stacked sets of hairlines — a fine 8px mesh and a heavier 64px major
+    line — reproducing the ruled paper a structure is drafted on. Kept extremely
+    faint: it is texture that gives large empty areas depth, and the moment it
+    competes with a number for attention it has failed.
+
+    The pitch is a local variable so a section can retune the mesh without a
+    second class (see `.blueprint-grid--paper`); the colours come from the
+    theme, so the mesh inverts for free.
+  */
+  .blueprint-grid {
+    --grid-size: 8px;
+    --grid-size-major: 64px;
+
+    background-image:
+      linear-gradient(to right, var(--app-grid-major) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--app-grid-major) 1px, transparent 1px),
+      linear-gradient(to right, var(--app-grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--app-grid) 1px, transparent 1px);
+    background-size:
+      var(--grid-size-major) var(--grid-size-major),
+      var(--grid-size-major) var(--grid-size-major),
+      var(--grid-size) var(--grid-size),
+      var(--grid-size) var(--grid-size);
+  }
+
+  /* Graph paper for the drawing surface: squarer than the hero mesh, and a
+     touch stronger, because here it doubles as a visual scale reference. */
+  .blueprint-grid--paper {
+    --grid-size: 10px;
+    --grid-size-major: 50px;
+    filter: saturate(1.4) brightness(0.98);
+  }
+
+  /*
+    Fades a texture out toward the edges so it never collides with the border
+    of its container. Applied to the grid layer, not the card, so the card's
+    own edge stays crisp.
+  */
+  .fade-edges {
+    -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, #000 55%, transparent 100%);
+    mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, #000 55%, transparent 100%);
+  }
+
+  /*
+    Glass surface: a translucent panel over the page texture.
+
+    Deliberately NOT `backdrop-filter`, despite that being the obvious way to
+    build this. Each backdrop-filtered element forces its own backdrop root and
+    re-blurs everything behind it on every paint, and the calculator stacks
+    eight of these cards over a fixed background layer — a combination
+    expensive enough to be worth avoiding on a page that is mostly static text.
+
+    It also bought nothing here: what sits behind these cards is a static
+    blueprint mesh, so a plain translucent fill is visually all but identical
+    to a blurred one at a fraction of the cost.
+  */
+  .glass {
+    background-color: var(--app-glass);
+  }
+
+  /*
+    The sticky header. This one *does* blur, and earns it: real content
+    scrolls underneath, and smearing it is the whole effect.
+  */
+  .chrome-bar {
+    background-color: var(--app-chrome);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    backdrop-filter: blur(16px) saturate(160%);
+  }
+
+  /* Chevron for `<select>`. Lives here rather than in a Tailwind arbitrary
+     value because the data URI contains spaces, and Tailwind splits class
+     names on whitespace — as a utility it would shatter into broken classes. */
+  .select-chevron {
+    background-image: var(--app-chevron);
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+    background-size: 1rem;
+  }
+
+  /*
+    Institutional logo container.
+
+    One class for every institutional mark, so a second or third logo cannot
+    end up a different size or shape from the first — which is the usual way
+    these blocks decay.
+
+    The white ground is deliberate and does not follow the theme. Both seals
+    ship as JPEGs, which have no transparency, so each arrives on an opaque
+    white square; dropped straight onto the dark theme that reads as a white
+    box with a logo trapped inside. Both marks happen to be circular with pure
+    white corners, so a white badge swallows those corners exactly.
+
+    Square now, where it used to be a circle. The two seals stay round — the
+    image inside keeps its own `rounded-full` — so what this draws is a ruled
+    frame around a medallion, which is how an institutional mark appears on a
+    letterhead. That also makes the container tolerant of a logo that is *not*
+    circular, which the round version was not: a rectangular mark can simply
+    be dropped in and it will sit correctly inside the frame.
+
+    The `box-shadow` carries both the hairline and the offset in one
+    declaration, which keeps it clear of Tailwind's `ring-*` and `shadow-*`
+    utilities instead of racing them through the cascade. It is a fixed
+    graphite rather than a token: the badge is pinned to white in every theme,
+    so an edge that followed the theme would go invisible on its own ground.
+  */
+  .institution-logo {
+    flex-shrink: 0;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow:
+      0 0 0 1px rgb(28 26 21 / 0.85),
+      2px 2px 0 0 rgb(28 26 21 / 0.2);
+  }
+
+  /* Numeric type. Applied to every cell that holds a figure. */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "zero" 1;
+    letter-spacing: -0.01em;
+  }
+
+  /*
+    `.text-gradient` used to live here — ink fading into the accent across the
+    hero headline and the author's name. It is deleted rather than re-coloured:
+    a gradient wash over display type is the signature of the skin this one
+    replaces, and the editorial voice wants the headline set in one solid ink
+    with the serif doing the work. Both call sites now use `text-ink`.
+  */
+
+}
+
+/* =======================================================================
+   Interaction
+   =======================================================================
+
+   Every rule below animates `transform`, `opacity`, `box-shadow` or
+   `border-color` and nothing else. The first two are composited on the GPU
+   and never touch layout; the last two repaint but do not reflow. Nothing
+   here animates a width, a height, a margin or a `top`, which is what keeps
+   a hover at 60fps on a page full of cards.
+
+   `will-change` is deliberately almost absent: it promotes an element to its
+   own layer permanently, and a page that promotes forty cards costs more
+   memory than the jank it was meant to avoid. Transform and opacity already
+   get a compositor fast path when they animate.
+
+   ---------------------------------------------------------------------
+   Why `utilities` and not `components`
+   ---------------------------------------------------------------------
+
+   These classes sit on elements that also carry Tailwind utilities —
+   `shadow-card`, `border-line`. Cascade layers outrank specificity outright,
+   so from the components layer a `.u-lift:hover` box-shadow loses to a plain
+   `.shadow-card` no matter how specific it is: the card would rise on hover
+   but its shadow and border would not follow, which reads as a glitch rather
+   than as height. In the same layer, specificity decides again and the
+   two-class hover selector wins.
+   ======================================================================= */
+
+@layer utilities {
+
+  /*
+    Card lift, rebuilt for the offset shadow.
+
+    The old version rose straight up and swapped a soft shadow for a softer,
+    larger one. That grammar does not survive a hard 2px offset: a card that
+    moves up while its shadow stays put simply detaches from it.
+
+    So the card moves diagonally *away* from the light — up and to the left by
+    exactly the distance the shadow grows — and the two stay locked together.
+    The numbers are not free: `--shadow-card` is 2px and `--shadow-raised` is
+    4px, so the 2px translation is precisely the difference. Change one and
+    the other has to follow, or the card will appear to slide across its own
+    shadow instead of lifting off the page.
+  */
+  .u-lift {
+    transition:
+      transform var(--motion-base) var(--ease-out),
+      box-shadow var(--motion-base) var(--ease-out),
+      border-color var(--motion-base) var(--ease-out);
+  }
+
+  .u-lift:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-raised);
+    border-color: var(--color-accent);
+  }
+
+  /* The icon inside a lifted card, travelling a touch further than the card
+     so the parallax reads. A rotation here would fight the right angles the
+     rest of the skin is built on. */
+  .u-lift__icon {
+    transition:
+      transform var(--motion-base) var(--ease-out),
+      border-color var(--motion-base) var(--ease-out);
+  }
+
+  .u-lift:hover .u-lift__icon {
+    transform: translate(-2px, -2px);
+    border-color: var(--color-accent);
+  }
+
+  /*
+    Buttons. `:active` is the half most interfaces forget: without a press
+    state a click has no physical answer, and the control feels like a
+    picture of a button rather than a button.
+  */
+  .u-btn {
+    transition:
+      transform var(--motion-fast) var(--ease-out),
+      box-shadow var(--motion-fast) var(--ease-out),
+      border-color var(--motion-fast) var(--ease-out),
+      background-color var(--motion-fast) var(--ease-out),
+      filter var(--motion-fast) var(--ease-out);
+  }
+
+  /*
+    Hover lifts off the shadow; press drives the button down into it.
+
+    The press is the half worth explaining. `translate(2px, 2px)` moves the
+    button exactly onto the offset, and killing the shadow in the same frame
+    means the gap closes completely — the control looks pressed flat against
+    the page rather than merely scaled down. A `scale()` cannot express that,
+    which is why the old version's 0.98 is gone.
+
+    The 2px matches `--shadow-card`. A button carrying `shadow-raised` presses
+    only halfway, which is correct: it started twice as far off the page.
+  */
+  .u-btn:hover {
+    transform: translate(-1px, -1px);
+  }
+
+  .u-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+    transition-duration: 60ms;
+  }
+
+  /* The arrow that walks out of a call to action on hover. */
+  .u-btn__arrow {
+    transition: transform var(--motion-base) var(--ease-spring);
+  }
+
+  .u-btn:hover .u-btn__arrow {
+    transform: translateX(4px);
+  }
+
+  /*
+    Nav link with a sliding underline.
+
+    The indicator is a pseudo-element scaled on the X axis rather than a
+    width animation, so it is composited and costs no layout. `transform-
+    origin` flips between hover and rest so it grows from the left and
+    retreats to the right, which reads as direction rather than as a blink.
+  */
+  .u-navlink {
+    position: relative;
+    transition:
+      color var(--motion-fast) var(--ease-out),
+      background-color var(--motion-fast) var(--ease-out);
+  }
+
+  .u-navlink::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0.75rem;
+    bottom: 0.25rem;
+    height: 3px;
+    /* Solid, square and a pixel thicker than before. The gradient it replaces
+       faded to a second hue at the right end, which under a 3rem link read as an
+       underline that had not finished loading. */
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--motion-base) var(--ease-out);
+  }
+
+  .u-navlink:hover::after,
+  .u-navlink[aria-current='page']::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  /* Small bordered pills — the author chip, the eyebrow badge. */
+  .u-chip {
+    transition:
+      transform var(--motion-base) var(--ease-out),
+      border-color var(--motion-base) var(--ease-out),
+      background-color var(--motion-base) var(--ease-out);
+  }
+
+  .u-chip:hover {
+    transform: translateY(-2px);
+  }
+
+  /*
+    Reveal on scroll.
+    ---------------------------------------------------------------------
+    The hidden state is gated behind `[data-js]`, which the inline script in
+    the layout sets before first paint. That gate is the whole progressive
+    enhancement story: with JavaScript unavailable the attribute is never
+    written, the rule never matches, and every element is simply visible.
+    Hiding content by default and revealing it with script would leave a
+    no-JS visitor staring at a blank page.
+  */
+  :root[data-js] .reveal:not(.is-visible) {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+
+  /*
+    An animation, not a transition — and that is not a stylistic preference.
+
+    A `transition` on `.reveal` sets the `transition` shorthand, which
+    replaces whatever `.u-lift` declared on the same element. A card carrying
+    both classes would lose its hover timing and inherit the reveal's: a 460ms
+    lift, delayed by its own stagger. Animations occupy a separate channel and
+    leave the transition property untouched, so the two compose instead of
+    fighting.
+
+    `backwards`, never `forwards`: backwards applies the opening keyframe
+    during the stagger delay (so the card stays hidden until its turn), then
+    releases the element back to the normal cascade once it ends. A forwards
+    fill would keep pinning `transform: none` at animation priority, which
+    outranks a plain declaration and would silently kill the hover lift.
+  */
+  .reveal.is-visible {
+    animation: reveal-in var(--motion-slow) var(--ease-out) backwards;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+}
+
+/* ===========================================================================
+   Motion
+   ===========================================================================
+
+   Every animation here is decorative — nothing in the application depends on
+   one running to become usable or readable. That is what makes the blanket
+   `prefers-reduced-motion` switch at the bottom safe.
+   =========================================================================== */
+
+/* Keyframes stay outside every cascade layer: `@keyframes` is not subject to
+   the cascade, and keeping it at the top level avoids any question of whether
+   a layered definition is visible to the utilities below. */
+
+/* Draws an SVG stroke on. Paired with `pathLength="1"` on the element, so
+   one keyframe works for any line regardless of its real length. */
+@keyframes draw-stroke {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The deflected shape breathing under load. Deliberately tiny: it suggests
+   deflection, it does not simulate it. */
+@keyframes sway {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* The scroll-reveal entrance. Its opening frame matches the resting state in
+   `.reveal:not(.is-visible)` exactly; a mismatch there shows up as a visible
+   jump on the first frame. */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* A node appearing on the hero frame: it lands rather than fades, which is
+   what makes the joints read as being placed onto the bars. */
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* The load arrow arriving, overshooting slightly along its own axis. */
+@keyframes arrow-land {
+  from {
+    opacity: 0;
+    transform: translate(-9px, -9px);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(2px, 2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The live dot on the hero badge. Deliberately faint — a beacon, not a
+   blinking cursor competing with the headline beside it. */
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.7);
+  }
+}
+
+@layer utilities {
+  /* `both`, not `forwards`: these are staggered with `animation-delay`, and
+     without the backwards half the line would sit fully drawn during its own
+     delay and then snap to hidden the instant the animation began. */
+  .animate-draw-stroke {
+    stroke-dasharray: 1;
+    animation: draw-stroke 1.1s var(--ease-in-out) both;
+  }
+
+  .animate-sway {
+    animation: sway 5s ease-in-out infinite;
+  }
+
+  .animate-rise-in {
+    animation: rise-in var(--motion-slow) var(--ease-out) both;
+  }
+
+  .animate-fade-in {
+    animation: fade-in var(--motion-slow) var(--ease-out) both;
+  }
+
+  /*
+    `transform-box: fill-box` is what makes a scale on an SVG shape behave.
+    Without it the transform origin is the SVG's own coordinate origin, so a
+    circle at (360, 200) does not grow in place — it flies in from the corner.
+  */
+  .animate-pop-in {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: pop-in var(--motion-base) var(--ease-spring) both;
+  }
+
+  .animate-arrow-land {
+    animation: arrow-land var(--motion-slow) var(--ease-spring) both;
+  }
+
+  .animate-pulse-dot {
+    animation: pulse-dot 2.4s ease-in-out infinite;
+  }
+}
+
+/*
+  One switch, last in the file so it wins.
+
+  `!important` is load-bearing here rather than lazy: it has to beat every
+  animation utility above — and the theme-transition block, which is itself
+  `!important` — regardless of layer order, and honouring the setting matters
+  more than any individual effect. Animations are reduced to a single final
+  frame rather than removed, so anything that animates *in* still ends up
+  visible.
+*/
+@media (prefers-reduced-motion: reduce) {
+  /*
+    The reveal system needs an explicit escape hatch, not just a shortened
+    transition. Its resting state is `opacity: 0`, and that state is applied
+    by CSS, not by the animation — so collapsing the duration alone would
+    leave every unrevealed element invisible until its observer happened to
+    fire, and permanently invisible if the observer never ran. Forcing the
+    final state here is what guarantees the page is complete and readable
+    with no motion at all.
+  */
+  :root[data-js] .reveal,
+  :root[data-js] .reveal:not(.is-visible) {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Endless idle loops are removed outright rather than sped up: at 0.01ms
+     an infinite animation still repaints forever. */
+  .animate-sway,
+  .animate-pulse-dot {
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    /* Delays have to go too. The staggered entrances are built from them, and
+       leaving them in place would hold elements hidden for up to a second
+       before snapping them into view — motion sickness traded for a flash. */
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===========================================================================
+   PRINT — the calculation report
+   ===========================================================================
+
+   `window.print()` on a screen interface is not a report. What the browser
+   hands the printer by default is a dark navy page with a floating navbar, a
+   scroll container clipping a table at its third column, and a drawing sized
+   to the pixel width of whatever window happened to be open. This block is
+   what turns that into a document.
+
+   Four problems, in the order they matter:
+
+     1. THE THEME. Paper has one ground, and it is white. A student who works
+        in the dark theme must not get a report that is navy with pale grey
+        type — it is unreadable on paper, it drains a cartridge, and most
+        printers render the fill as a muddy grey anyway. The palette is
+        redefined here for BOTH themes, so the report is identical whichever
+        one is on screen. This is not a copy of the light theme: it is a paper
+        theme, with a true white ground, near-black type and hairline rules.
+
+     2. CLIPPING. Every scroll container on screen is a promise that the user
+        can reach the rest by scrolling. On paper there is no scrolling, so
+        `overflow: hidden` silently deletes content. Anything that scrolls,
+        clips or caps its height has to be released.
+
+     3. THE DRAWING. The SVG carries explicit width and height attributes,
+        measured from the container by a ResizeObserver — which does not run
+        for the print layout. Overriding the two attributes with CSS and
+        leaning on the viewBox makes it scale to the page instead, with its
+        aspect ratio intact and no re-measurement needed.
+
+     4. COLOUR IN THE DIAGRAMS. Browsers drop backgrounds and fills when
+        printing unless told otherwise, which would leave the internal-force
+        diagrams as empty outlines. `print-color-adjust: exact` is applied
+        narrowly — to the drawing and to the badges — rather than globally, so
+        it buys the diagrams their colour without also forcing every card
+        surface onto the page.
+
+   Deliberately UNLAYERED, and last in the file. Tailwind's own utilities live
+   in `@layer`, and unlayered rules beat layered ones regardless of
+   specificity, so these win without a single `!important`. The exception is
+   `display`, which is set only on elements this block names explicitly —
+   a blanket rule would override the `print:hidden` utilities the components
+   use to remove themselves from the report.
+   =========================================================================== */
+
+@media print {
+  /* --- Paper theme ------------------------------------------------------ */
+  :root {
+    color-scheme: light;
+
+    --color-base: #ffffff;
+    --color-base-raised: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-raised: #f4f4f5;
+    --color-sunken: #ffffff;
+
+    /* Hairlines. On screen a border is a soft tint of the ground; on paper it
+       has to be an actual grey, or a 300 dpi printer renders nothing at all. */
+    --color-line: #c4c4c8;
+    --color-line-strong: #8a8a90;
+
+    /* Near-black rather than pure black: #000 on white is harsh at 10pt and
+       is what makes a printout look like a spreadsheet dump. */
+    --color-ink: #111111;
+    --color-ink-muted: #3f3f46;
+    --color-ink-faint: #52525b;
+    --color-ink-dim: #6b6b75;
+
+    /* Row striping and every other `bg-wash/N` tint. Dark ink over a light
+       page, as in the light theme — the dark theme inverts it to white, which
+       on paper would make the stripes disappear. */
+    --color-wash: #111111;
+
+    /* Structural colours are pinned to their light-theme values, one step
+       deeper. The dark theme lifts them to 400-level tones tuned for a black
+       ground; those same tones on white are washed out, and a compression
+       orange that reads as yellow is a legend that no longer matches its
+       diagram. */
+    --color-tension: #1e3a8a;
+    --color-tension-ink: #1e3a8a;
+    --color-compression: #c2410c;
+    --color-compression-ink: #7c2d12;
+    --color-deformed: #15803d;
+    --color-load: #b91c1c;
+    --color-bar-zero: #6b6b75;
+    --color-diagram-positive: #0f766e;
+    --color-diagram-negative: #9f1239;
+
+    /* Deepened for toner: the screen blue is tuned against a lit display and
+       prints as a washed sky at 10pt.
+
+       This is also the one context where the accent and the tension blue must
+       NOT be told apart by lightness, because they will not be — a report is
+       greyscale on most departmental printers. They are already separated by
+       what carries them: the accent appears only in body chrome, and tension
+       only inside the drawing and its legend. */
+    --color-accent: #1e40af;
+    --color-accent-bright: #1e40af;
+    --color-accent-ink: #172554;
+
+    --color-ok: #065f46;
+    --color-warn: #92400e;
+    --color-danger: #b91c1c;
+
+    /* Surfaces and depth: paper has none. The offset shadow goes too — on a
+       printed page a 2px displaced edge is not a style, it is a registration
+       error. */
+    --app-glass: #ffffff;
+    --app-chrome: #ffffff;
+    --app-grid: transparent;
+    --app-grid-major: transparent;
+    --shadow-card: none;
+    --shadow-raised: none;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 1.2cm;
+  }
+
+  html,
+  body {
+    background: #ffffff;
+    /* Screen type is sized for a lit display at arm's length. On paper the
+       same sizes come out oversized and cost pages, so the whole document
+       steps down one notch. */
+    font-size: 10.5pt;
+  }
+
+  /*
+    Colour, everywhere.
+
+    Browsers drop backgrounds and fills when printing. That default is a
+    kindness on an ordinary web page and a defect here: the internal-force
+    diagrams would print as empty outlines and the tension/compression badges
+    as blank pills, and in both cases the tint IS the information.
+
+    Set on `body` rather than on the handful of elements that need it because
+    the property inherits — one declaration reaches the whole document. It is
+    safe to apply this broadly only because the paper theme above has already
+    turned every surface white: there are no dark card fills left for it to
+    commit to paper.
+  */
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /*
+    Corners and depth are screen affordances: they say "this is a panel
+    floating over a page". Paper has no depth to suggest, and a rounded rule
+    around a table just looks like a mistake in a technical document.
+  */
+  .rounded-card,
+  .rounded-inset,
+  .rounded-xl,
+  .rounded-lg {
+    border-radius: 0 !important;
+  }
+
+  /* --- Release every clip ----------------------------------------------- */
+
+  /*
+    The one rule broad enough to be worth the risk. A scroll container, a
+    sticky column with a capped height, a card that hides its own overflow to
+    round a corner — all of them delete content on paper rather than merely
+    styling it, and there are enough of them that naming each would guarantee
+    missing one. Nothing here touches `display`, so `print:hidden` still wins.
+
+    THE DRAWING IS EXCLUDED, and the exclusion is not cosmetic. Its clip is
+    load-bearing: `h-80 overflow-hidden` is what gives the ResizeObserver
+    behind the SVG a bounded box to measure. Release it and the observer
+    reports the size of the drawing it just laid out, React re-renders the SVG
+    at that size, the observer measures again — a feedback loop that took the
+    canvas to 3143px wide inside a 1568px window before this exclusion existed.
+  */
+  *:not(.print-canvas, .print-canvas *) {
+    overflow: visible !important;
+    max-height: none !important;
+    position: static !important;
+  }
+
+  /* Depth cues, on the other hand, are safe to strip everywhere: none of them
+     affects layout, and a drop shadow on paper is a grey smudge. */
+  * {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Fixed backdrops become static under the rule above, which would drop them
+     into the flow as blank blocks at the top of the report. */
+  [aria-hidden='true'].blueprint-grid,
+  [aria-hidden='true'] > .blueprint-grid {
+    display: none;
+  }
+
+  /* --- The drawing ------------------------------------------------------ */
+
+  /*
+    A DEFINITE box, and the SVG fills it.
+
+    The obvious version of this rule — `width: 100%; height: auto` — is wrong
+    twice over. It leaves the container without a definite height, which is
+    what the ResizeObserver needs to measure; and it derives the height from
+    the screen aspect ratio, so a window that happened to be short produced a
+    letterbox on the page and a tall one pushed the tables off it.
+
+    Stated as a fixed height instead, the drawing always occupies the same band
+    of the report whatever the window was doing when Export was pressed. The
+    SVG's own viewBox and the default `preserveAspectRatio` do the fitting:
+    the frame is scaled to fit inside the band and centred in it, never
+    stretched and never clipped.
+  */
+  .print-canvas {
+    height: 88mm !important;
+    overflow: hidden !important;
+  }
+
+  .print-canvas > div,
+  .print-canvas > div > div {
+    height: 100% !important;
+  }
+
+  .print-canvas svg {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* --- Tables ------------------------------------------------------------
+
+     Every table in the application is `w-full min-w-max` inside a horizontal
+     scroll container. On screen that pair is right: a twelve-column stiffness
+     matrix cannot shrink to a phone, so it keeps its natural width and the
+     user scrolls to it.
+
+     On paper there is nothing to scroll to. `min-width: max-content` makes the
+     table as wide as its widest row, the page cannot grow to match, and the
+     right-hand columns fall off the sheet — the global matrix of a four-node
+     frame is thirteen columns wide and would lose its last four in silence.
+     Worse, the overflow widens the document, and the drawing's ResizeObserver
+     then measures THAT: releasing the scroll container without this rule took
+     the layout to 3188px on a 1539px viewport.
+
+     So the constraint inverts. The table fits the page, and the columns give
+     way — which they can, because every cell is a short formatted number. */
+  table {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Numbers are what has to fit, and they are the one thing that can be set
+     small without being lost: they are monospaced, tabular and short. */
+  table {
+    font-size: 8pt;
+  }
+
+  /*
+    Ruled cells, editorial rather than soft.
+
+    On screen the table is framed in ink and divided by hairlines, because
+    twenty near-black rules at 30px pitch turn a stiffness matrix into a
+    barcode. On paper the pitch is half that and the rules are laid at 300 dpi,
+    where a light grey line is a grey suggestion of a line — so every cell gets
+    a real stroke and the grid reads as one.
+
+    `border-collapse` is already on from the screen styles, so adjacent cells
+    share a single edge rather than doubling it. That is what keeps a full grid
+    at 0.4pt from thickening into 0.8pt everywhere but the outer rim.
+  */
+  th,
+  td {
+    padding: 2.5pt 3pt !important;
+    border: 0.4pt solid #5c5c66 !important;
+  }
+
+  /* The header row carries the frame's weight: it is the one row that has to
+     stay distinguishable when a long table breaks across a page and the
+     reader picks it up again halfway down. */
+  thead th {
+    border-bottom-width: 1pt !important;
+    border-bottom-color: #111111 !important;
+    background-color: #f4f4f5 !important;
+    color: #111111 !important;
+    font-weight: 600;
+  }
+
+  /*
+    The zebra striping goes.
+
+    It exists on screen to let the eye track one row across eight columns, a
+    job the ruled grid now does outright — and two devices doing one job is how
+    a printed table starts looking busy. Dropping it also saves the toner that
+    `print-color-adjust: exact` would otherwise spend on every other row.
+  */
+  tbody tr {
+    background-color: transparent !important;
+  }
+
+  /* A stiffness matrix is the widest thing in the report by some margin: up
+     to 3n + 1 columns, where the screen tables have eight at most. */
+  .num.w-full td,
+  .num.w-full th {
+    font-size: 6.5pt;
+    padding: 1.5pt 2pt !important;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+}

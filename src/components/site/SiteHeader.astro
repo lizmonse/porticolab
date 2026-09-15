@@ -1,0 +1,122 @@
+---
+/**
+ * Static header for the landing page.
+ *
+ * A utility bar, not a navigation bar. It carries the identity on the left and
+ * exactly two controls on the right: the theme toggle and the one action the
+ * page exists to send you to.
+ *
+ * ---------------------------------------------------------------------------
+ * Why the section links are gone, and what went with them
+ * ---------------------------------------------------------------------------
+ *
+ * The three anchors — Inicio, Características, El proyecto — were the input to
+ * a tab controller that turned the landing into one full-height panel at a
+ * time. Removing the links therefore removed the controller's reason to exist,
+ * and three behaviours went with them: the mobile menu (a menu of nothing), the
+ * scrollspy (a highlight with nothing to highlight) and the view mode itself.
+ *
+ * That last one could not simply be left in place. The panels are hidden by
+ * `:root[data-js] .view { display: none }` and only revealed by the `is-active`
+ * class the controller adds — so a controller that never runs, because it found
+ * no links, would have left every section on the page permanently invisible.
+ * The landing is now an ordinary scrolling document, which also brings back the
+ * closing call to action and the footer that view mode used to retire.
+ *
+ * One behaviour survives, and it is the only script left here: the rule under
+ * the bar darkens from the hairline tone to full ink once the page has
+ * scrolled, so the header stays separated from content moving underneath it.
+ */
+
+interface Props {
+  /** Marks the current route, so the app route does not link to itself. */
+  current?: 'home' | 'app';
+}
+
+const { current = 'home' } = Astro.props;
+---
+
+<header
+  data-site-header
+  data-elevated="false"
+  class="chrome-bar border-line-strong data-[elevated=true]:border-ink sticky top-0 z-40 border-b transition-colors duration-200"
+>
+  <div class="section-shell flex items-center gap-x-4 py-3">
+    <a href="/" class="group flex min-w-0 shrink items-center gap-3">
+      <span
+        class="bg-accent border-ink flex size-9 shrink-0 items-center justify-center border text-white transition-transform duration-200 group-hover:-translate-x-px group-hover:-translate-y-px"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="square"
+          stroke-linejoin="round"
+          class="size-5"
+          aria-hidden="true"
+        >
+          <path d="M3 19h18M5 19 12 5l7 14M7.5 14h9"></path>
+        </svg>
+      </span>
+      <span class="font-display text-ink truncate text-base font-bold tracking-tight sm:text-lg">
+        Pórticos 2D
+      </span>
+    </a>
+
+    <div class="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+      {
+        current !== 'app' && (
+          <a
+            href="/calculadora"
+            class="bg-accent border-ink shadow-card u-btn inline-flex items-center gap-2 border px-3.5 py-2 text-sm font-semibold text-white"
+          >
+            {/* Two labels rather than one truncated: on a phone the arrow and
+                the verb carry the whole meaning, and "Lanzar entorno" wrapping
+                onto two lines inside a 36px bar is worse than a shorter word. */}
+            <span class="hidden sm:inline">Lanzar entorno</span>
+            <span class="sm:hidden">Lanzar</span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="u-btn__arrow size-4"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
+            </svg>
+          </a>
+        )
+      }
+    </div>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-site-header]');
+
+  if (header) {
+    // Read in a rAF rather than straight from the scroll event: `scrollY` is a
+    // layout read, and doing it on every scroll tick forces synchronous style
+    // resolution. `passive` tells the browser we will never preventDefault, so
+    // scrolling is never blocked waiting for this.
+    let ticking = false;
+    const sync = () => {
+      header.dataset.elevated = String(window.scrollY > 8);
+      ticking = false;
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(sync);
+      },
+      { passive: true },
+    );
+    sync();
+  }
+</script>

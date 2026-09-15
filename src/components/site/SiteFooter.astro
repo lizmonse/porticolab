@@ -1,0 +1,28 @@
+---
+/**
+ * Footer for the landing page.
+ *
+ * Deliberately just the name. The technical provenance that used to fill this
+ * block — what validates the engine, what it assumes, under what licence it is
+ * released — is either on the page above or in the repository, and repeating it
+ * at the bottom of every scroll made the page end on a paragraph nobody was
+ * going to read.
+ *
+ * The author credit lives in the #proyecto section, not here: a footer is where
+ * a name goes to be overlooked.
+ */
+---
+
+<!--
+  `section-shell` rather than its own container: the footer has to line up with
+  the sections above it, and sharing the measure is what guarantees that
+  instead of hoping two hard-coded widths stay equal.
+-->
+<footer class="border-line-strong bg-base border-t">
+  <div class="section-shell flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 py-7">
+    <p class="font-display text-ink text-sm font-semibold tracking-tight">Pórticos 2D</p>
+    <p class="text-ink-faint text-[10px] font-semibold tracking-[0.18em] uppercase">
+      Análisis matricial de pórticos planos
+    </p>
+  </div>
+</footer>

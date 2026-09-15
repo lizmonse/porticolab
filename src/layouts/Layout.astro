@@ -1,0 +1,98 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <!--
+      Favicons.
+
+      Ordered widest-support-last on purpose. A browser picks the last `icon`
+      link it understands, so the SVG is declared first and the raster
+      fallbacks after it; `sizes="any"` on the .ico is the documented trick
+      that stops Chrome preferring it over the scalable version.
+
+      The `?v=` query is cache-busting. Favicons are cached far more
+      aggressively than ordinary assets — often past a hard reload — so a
+      replaced icon can keep showing the old one for days. Bump the number
+      whenever the artwork changes.
+    -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=4" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=4" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=4" />
+    <link rel="icon" href="/favicon.ico?v=4" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!--
+      Tints the browser's own chrome on mobile.
+
+      A plain literal now, and it stays one: the application renders in a
+      single palette, so there is nothing left to rewrite it to. Keep it in
+      step with `--color-base` in global.css by hand — a `<meta>` content
+      attribute is not CSS and cannot resolve a custom property.
+    -->
+    <meta name="theme-color" content="#fafafa" />
+
+    <!--
+      Scripting probe.
+
+      This used to be the anti-FOUC theme script: it read the stored theme,
+      stamped `data-theme` on <html> and re-tinted the meta above, all before
+      first paint. The dark theme is gone and so is all of that. What remains
+      is the one line that was never about theming.
+
+      `is:inline` is still essential. Astro would otherwise bundle this into a
+      module script, which is deferred, and a deferred script runs AFTER first
+      paint — which is exactly the flash this placement exists to avoid.
+
+      `data-js` marks that scripting is available. The scroll-reveal styles
+      hang off it: without the attribute they never match, so a visitor with
+      JavaScript disabled gets every section visible instead of a blank page
+      waiting for an observer that will never run. It has to be set here, and
+      synchronously, for the same reason the theme did.
+    -->
+    <script is:inline>
+      document.documentElement.dataset.js = '';
+    </script>
+
+    <!--
+      Webfonts over a stylesheet link rather than an npm package: it keeps the
+      project dependency-free, and the tokens in global.css already declare a
+      full fallback stack for each family, so a blocked request degrades to
+      system type instead of breaking the page.
+
+      `display=swap` renders the fallback immediately; only the weights the
+      interface actually uses are requested.
+
+      One superfamily in three cuts — IBM Plex Serif for display, Plex Sans
+      for the interface, Plex Mono for every number. Keep the families and
+      weights here in step with the `--font-*` tokens in global.css: a weight
+      requested there but missing here is synthesised by the browser, which
+      is where faux-bold serif headings come from.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    />
+
+    <title>{title}</title>
+  </head>
+  <body class="bg-base text-ink font-sans h-full antialiased">
+    <slot />
+  </body>
+</html>

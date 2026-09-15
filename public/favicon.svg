@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Pórticos 2D">
+  <title>Pórticos 2D</title>
+    <!--
+    Brand mark: the square tile from the application header, carrying the same
+    accent fill and the same truss glyph.
+
+    Flat and square, where this was a rounded rectangle with an indigo-to-
+    violet gradient. That gradient was the last surviving piece of the original
+    skin anywhere in the project — it outlived the palette it belonged to by
+    four rounds of changes, because a favicon is the one asset nobody looks at
+    while working on the page it belongs to.
+
+    Drawn as a filled tile rather than a bare glyph on purpose. A transparent
+    icon has to guess the tab's background, which is why the Astro default it
+    replaced needed a `prefers-color-scheme` rule to flip between black and
+    white. A full-bleed tile carries its own ground, so it reads identically on
+    a light tab, a dark tab, a pinned tab and a bookmark bar.
+
+    Proportions are set for 16px, not for the poster-sized version: the strokes
+    are much heavier than the 1.8/24 of the interface icon, because at a 1:4
+    downscale a hairline turns into grey mush.
+
+    The gap between the bottom chord and the ground line is the number that
+    decides whether this works. At 16px the tile is a quarter of this viewBox,
+    so the 14 units of clear space between those two strokes come out as 3.5px
+    — enough to stay open through antialiasing. Two earlier attempts, at 6 and
+    then 10 units, both closed up into a single white bar; the fix was to
+    raise the chord *and* thin the strokes, since weight and spacing trade
+    against each other at this scale.
+  -->
+  <!--
+    A literal #0055ff rather than a reference to the accent custom property:
+    an SVG loaded through a `link rel=icon` is an independent document and
+    never sees the page's variables. Keep it in step with the accent token in
+    global.css by hand, and bump the `?v=` query in Layout.astro when it
+    changes, because favicons are cached past a hard reload.
+
+    NOTE: no double hyphen may appear anywhere in these comments. XML forbids
+    it outright, and writing the token's real name here — which starts with
+    two of them — is what made this file unparseable by every strict reader
+    while Chrome went on rendering it. `scripts/generate-favicons.mjs` is what
+    caught it; the browser never will.
+  -->
+  <rect width="64" height="64" fill="#0055ff" />
+
+  <g
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <!-- Ground line, the two rafters, and the bottom chord: the smallest
+         drawing that still reads as a truss. The chord's endpoints land
+         exactly on the rafters — at y=31 the sloped edges sit at x=32±7.06 —
+         so the three members meet cleanly instead of overhanging. -->
+    <path d="M12 50h40" />
+    <path d="M16 50 32 16l16 34" />
+    <path d="M24.9 31h14.2" />
+  </g>
+</svg>

@@ -1,0 +1,93 @@
+---
+/**
+ * The institutional backing block: every supporting institution, as one set.
+ *
+ * Replaces the earlier single-university badge. Rendering the list from
+ * `data/institutions.ts` rather than writing each logo out by hand is what
+ * guarantees the requirement that matters here — that the marks read as a
+ * group. Same container, same dimensions, same alignment, by construction
+ * instead of by two blocks of markup being kept in agreement.
+ *
+ * Used twice: at `md` inside the credits card, at `sm` in the footer.
+ */
+import { INSTITUTIONS } from '../../data/institutions';
+
+interface Props {
+  /** `md` for the credits panel, `sm` for the footer's quieter credit. */
+  size?: 'sm' | 'md';
+  /** Extra classes for the wrapper. */
+  class?: string;
+}
+
+const { size = 'md', class: className = '' } = Astro.props;
+
+const SIZES = {
+  sm: { badge: 'size-9 p-1', name: 'text-xs', gap: 'gap-x-6 gap-y-3' },
+  md: { badge: 'size-12 p-1.5', name: 'text-sm', gap: 'gap-x-8 gap-y-4' },
+};
+
+const style = SIZES[size];
+---
+
+<div class={className}>
+  <p class="text-ink-faint text-[10px] font-semibold tracking-[0.18em] uppercase">
+    Respaldo institucional
+  </p>
+
+  <!--
+    `flex-wrap` rather than a grid with a fixed column count: the two lockups
+    sit side by side while there is room and drop onto their own lines when
+    there is not, without a breakpoint having to guess where that happens.
+  -->
+  <ul class={`mt-3 flex flex-wrap ${style.gap}`}>
+    {
+      INSTITUTIONS.map((institution) => (
+        <li class="flex min-w-0 items-center gap-3">
+          {/*
+            `width`/`height` are the file's true intrinsic size, which is what
+            lets the browser reserve the box before the image arrives so
+            nothing below it shifts on load. They differ between the two files
+            (200 and 447); the rendered size is set by CSS and is identical.
+          */}
+          <span class={`institution-logo ${style.badge} grid place-items-center`}>
+            {
+              institution.logo === null ? (
+                /*
+                  Placeholder while the real mark is missing. Drawn rather than
+                  left blank, and sized exactly like the image it stands in
+                  for, so the layout being reviewed now is the layout the logo
+                  will land in — an empty box would let the credits reflow the
+                  moment the file arrives.
+                */
+                <span
+                  class="font-display text-ink-muted text-xs font-bold tracking-tight"
+                  aria-hidden="true"
+                >
+                  {institution.initials}
+                </span>
+              ) : (
+                /*
+                  Deliberately NOT `loading="lazy"`. These are two small marks
+                  in a section a visitor reaches by scrolling a short page;
+                  deferring them saves nothing and risks a credits block whose
+                  logos arrive late or not at all.
+                */
+                <img
+                  src={institution.logo}
+                  alt={institution.name}
+                  width={institution.intrinsicSize}
+                  height={institution.intrinsicSize}
+                  decoding="async"
+                  class="size-full rounded-full object-contain"
+                />
+              )
+            }
+          </span>
+          <span class={`font-display text-ink min-w-0 font-semibold tracking-tight ${style.name}`}>
+            {institution.name}
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+</div>

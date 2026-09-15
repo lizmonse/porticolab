@@ -1,0 +1,15 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Dashboard } from '../components/frame/Dashboard';
+---
+
+<Layout
+  title="Calculadora · Pórticos 2D"
+  description="Calculadora interactiva de pórticos planos por el Método de la Rigidez Directa. Desplazamientos, giros, reacciones y fuerzas internas de cada barra."
+>
+  <!--
+    The whole dashboard is one island. client:load rather than client:visible
+    because it is the page: deferring it would show an empty shell first.
+  -->
+  <Dashboard client:load />
+</Layout>

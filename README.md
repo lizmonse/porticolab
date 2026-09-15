@@ -18,9 +18,9 @@ El resultado no se presenta como una caja negra. Además de la deformada, la pla
 
 ### Accesos
 
-- **Página principal:** [calc-estructural-2-d.vercel.app](https://calc-estructural-2-d.vercel.app/)
-- **Calculadora:** [calc-estructural-2-d.vercel.app/calculadora](https://calc-estructural-2-d.vercel.app/calculadora)
-- **Repositorio:** [DiegoCuaycal/CalcEstructural-2D](https://github.com/DiegoCuaycal/CalcEstructural-2D)
+- **Página principal:** [calc-estructural-2-d.vercel.app](https://github.com/lizmonse/porticolab.git)
+- **Calculadora:** [calc-estructural-2-d.vercel.app/calculadora](https://github.com/lizmonse/porticolab.git)
+- **Repositorio:** [Lizbeth Villafuerte/CalcEstructural-2D](https://github.com/lizmonse/porticolab.git)
 
 ## ¿Qué calcula?
 

@@ -396,7 +396,7 @@ En este ejemplo, los valores se envían directamente al motor. Por eso `E`, `A` 
 
 ```bash
 git clone https://github.com/lizmonse/porticolab.git
-cd CalcEstructural-2D
+cd porticolab
 npm install
 npm run dev
 ```
